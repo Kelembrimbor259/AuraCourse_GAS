@@ -77,7 +77,7 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 void UOverlayWidgetController::SendAttributeMessage(const float& AttributeValue, const FGameplayTag& MessageTag) const
 {
 	// Assigning Message Tag for broadcast
-	const FGameplayTag MsgTag = AuraTag::Attributes_Update_Attribute;
+	const FGameplayTag MsgTag = MessageTag;
 	
 	// Create message to broadcast
 	FAttributeUpdate AttributeMessage;

@@ -73,15 +73,15 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 		// Clamp and fall into out of health handling below
 		SetHealth(FMath::Clamp(GetHealth(), MinimumHealth, GetMaxHealth()));
 	}
-	else if (Data.EvaluatedData.Attribute == GetMaxHealthAttribute())
-	{
-		// Clamp current health
-		SetHealth(FMath::Clamp(GetHealth(), MinimumHealth, GetMaxHealth()));
-	}
 	else if (Data.EvaluatedData.Attribute == GetManaAttribute())
 	{
 		// Clamp and fall into out of mana handling below
 		SetMana(FMath::Clamp(GetMana(), MinimumMana, GetMaxMana()));
+	}
+	else if (Data.EvaluatedData.Attribute == GetMaxHealthAttribute())
+	{
+		// Clamp current health
+		SetHealth(FMath::Clamp(GetHealth(), MinimumHealth, GetMaxHealth()));
 	}
 	else if (Data.EvaluatedData.Attribute == GetMaxManaAttribute())
 	{
@@ -98,8 +98,6 @@ void UAuraAttributeSet::PreAttributeBaseChange(const FGameplayAttribute& Attribu
 	Super::PreAttributeBaseChange(Attribute, NewValue);
 
 	ClampAttribute(Attribute, NewValue);
-
-	//GEngine->AddOnScreenDebugMessage(-1, 8.f, FColor::Blue, TEXT("PreAttributeBaseChange"));
 }
 
 void UAuraAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
@@ -107,8 +105,6 @@ void UAuraAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, 
 	Super::PreAttributeChange(Attribute, NewValue);
 
 	ClampAttribute(Attribute, NewValue);
-
-	//GEngine->AddOnScreenDebugMessage(-1, 8.f, FColor::Yellow, TEXT("PreAttributeChange"));
 }
 
 void UAuraAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
@@ -126,8 +122,7 @@ void UAuraAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute,
 			AuraASC->ApplyModToAttribute(GetHealthAttribute(), EGameplayModOp::Override, NewValue);
 		}
 	}
-	
-	if (Attribute == GetMaxManaAttribute())
+	else if (Attribute == GetMaxManaAttribute())
 	{
 		// Make sure current mana is not greater than the new max mana.
 		if (GetMana() > NewValue)
@@ -138,26 +133,27 @@ void UAuraAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute,
 			AuraASC->ApplyModToAttribute(GetManaAttribute(), EGameplayModOp::Override, NewValue);
 		}
 	}
-	
-	GEngine->AddOnScreenDebugMessage(-1, 8.f, FColor::Green, TEXT("PostAttributeChange"));
 }
 
 void UAuraAttributeSet::ClampAttribute(const FGameplayAttribute& Attribute, float& NewValue) const
 {
+	constexpr float MinimumHealth = 0.0f;
+	constexpr float MinimumMana = 0.0f;
+	
 	if (Attribute == GetHealthAttribute())
 	{
-		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxHealth());
+		NewValue = FMath::Clamp(NewValue, MinimumHealth, GetMaxHealth());
 	}
-	if (Attribute == GetMaxHealthAttribute())
+	else if (Attribute == GetManaAttribute())
+	{
+		NewValue = FMath::Clamp(NewValue, MinimumMana, GetMaxMana());
+	}
+	else if (Attribute == GetMaxHealthAttribute())
 	{
 		// Do not allow max health to drop below 1.
 		NewValue = FMath::Max(NewValue, 1.0f);
 	}
-	if (Attribute == GetManaAttribute())
-	{
-		NewValue = FMath::Clamp(NewValue, 1.f, GetMaxMana());
-	}
-	if (Attribute == GetMaxManaAttribute())
+	else if (Attribute == GetMaxManaAttribute())
 	{
 		// Do not allow max mana to drop below 1.
 		NewValue = FMath::Max(NewValue, 1.0f);

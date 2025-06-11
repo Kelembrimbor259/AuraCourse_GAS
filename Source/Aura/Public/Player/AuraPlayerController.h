@@ -11,10 +11,10 @@ class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
 
-class IEnemyInterface;
+class AAuraEnemy;
 
 /**
- * 
+ * Aura Player Controller
  */
 UCLASS()
 class AURA_API AAuraPlayerController : public APlayerController
@@ -24,6 +24,8 @@ class AURA_API AAuraPlayerController : public APlayerController
 public:
 	AAuraPlayerController();
 	virtual void PlayerTick(float DeltaTime) override;
+
+	AAuraEnemy* GetCurrentHoveredEnemy() const;
 
 protected:
 	virtual void BeginPlay() override;
@@ -38,12 +40,6 @@ private:
 
 	void Move(const FInputActionValue& InputActionValue);
 
-	void CursorTrace();
-
-	TScriptInterface<IEnemyInterface> LastActor;
-	TScriptInterface<IEnemyInterface> ThisActor;
-
-	UPROPERTY(EditAnywhere,Category = "Input")
-	FVector2D Cursor;
+	TObjectPtr<AAuraEnemy> CurrentHoveredEnemy;
 	
 };
