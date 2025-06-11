@@ -34,10 +34,10 @@ void AAuraHUD::InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySyst
 	OverlayWidget->SetWidgetController(WidgetController);
 
 	// Delaying broadcasting initial values to next tick to make sure MID is set and ready to accept value changes
-	FFunctionGraphTask::CreateAndDispatchWhenReady([WidgetController, ASC]()
+	FFunctionGraphTask::CreateAndDispatchWhenReady([WidgetController]()
 	{
 		// Ваш код здесь
-		WidgetController->BroadcastInitialValues(Cast<UAuraAbilitySystemComponent>(ASC));
+		WidgetController->BroadcastInitialValues();
 	}, TStatId(), nullptr, ENamedThreads::GameThread);
 	
 	

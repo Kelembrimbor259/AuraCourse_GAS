@@ -72,16 +72,6 @@ struct FEffectProperties
 };
 
 
-/** 
- * Delegate used to broadcast attribute events, some of these parameters may be null on clients: 
- * @param EffectInstigator	The original instigating actor for this event
- * @param EffectCauser		The physical actor that caused the change
- * @param EffectSpec		The full effect spec for this change
- * @param EffectMagnitude	The raw magnitude, this is before clamping
- * @param OldValue			The value of the attribute before it was changed
- * @param NewValue			The value after it was changed
-*/
-DECLARE_MULTICAST_DELEGATE_SixParams(FAuraAttributeEvent, AActor* /*EffectInstigator*/, AActor* /*EffectCauser*/, const FGameplayEffectSpec* /*EffectSpec*/, float /*EffectMagnitude*/, float /*OldValue*/, float /*NewValue*/);
 
 
 /**
@@ -96,16 +86,7 @@ public:
 	UAuraAttributeSet();
 
 	UAuraAbilitySystemComponent* GetAuraAbilitySystemComponent() const;
-
 	
-	mutable FAuraAttributeEvent OnHealthChanged; // Delegate when health changes due to damage/healing, some information may be missing on the client
-	mutable FAuraAttributeEvent OnMaxHealthChanged; // Delegate when max health changes
-	mutable FAuraAttributeEvent OnOutOfHealth; // Delegate to broadcast when the health attribute reaches zero
-
-	mutable FAuraAttributeEvent OnManaChanged;
-	mutable FAuraAttributeEvent OnMaxManaChanged;
-	mutable FAuraAttributeEvent OnOutOfMana;
-
 	// Required overriding function to register variables for replication
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -228,7 +209,7 @@ private:
 	bool bOutOfHealth;
 	bool bOutOfMana;
 
-	// Store the health before any changes 
+	// Store mana and health before any changes 
 	float MaxHealthBeforeAttributeChange;
 	float HealthBeforeAttributeChange;
 	float MaxManaBeforeAttributeChange;

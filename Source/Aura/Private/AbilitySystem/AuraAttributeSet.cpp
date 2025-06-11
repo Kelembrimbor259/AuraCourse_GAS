@@ -36,7 +36,6 @@ UAuraAbilitySystemComponent* UAuraAttributeSet::GetAuraAbilitySystemComponent() 
 //~ Overriding function for replication
 void UAuraAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-	
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	//~ Marking Mana and Health attributes for replication
@@ -76,7 +75,7 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 	}
 	else if (Data.EvaluatedData.Attribute == GetMaxHealthAttribute())
 	{
-		// Clamp current health?
+		// Clamp current health
 		SetHealth(FMath::Clamp(GetHealth(), MinimumHealth, GetMaxHealth()));
 	}
 	else if (Data.EvaluatedData.Attribute == GetManaAttribute())
@@ -86,7 +85,7 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 	}
 	else if (Data.EvaluatedData.Attribute == GetMaxManaAttribute())
 	{
-		// Clamp current mana?
+		// Clamp current mana
 		SetMaxMana(FMath::Clamp(GetMana(), MinimumMana, GetMaxMana()));
 	}
 
@@ -100,16 +99,16 @@ void UAuraAttributeSet::PreAttributeBaseChange(const FGameplayAttribute& Attribu
 
 	ClampAttribute(Attribute, NewValue);
 
-	GEngine->AddOnScreenDebugMessage(-1, 8.f, FColor::Blue, TEXT("PreAttributeBaseChange"));
+	//GEngine->AddOnScreenDebugMessage(-1, 8.f, FColor::Blue, TEXT("PreAttributeBaseChange"));
 }
 
 void UAuraAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
 {
 	Super::PreAttributeChange(Attribute, NewValue);
 
-	//ClampAttribute(Attribute, NewValue);
+	ClampAttribute(Attribute, NewValue);
 
-	GEngine->AddOnScreenDebugMessage(-1, 8.f, FColor::Yellow, TEXT("PreAttributeChange"));
+	//GEngine->AddOnScreenDebugMessage(-1, 8.f, FColor::Yellow, TEXT("PreAttributeChange"));
 }
 
 void UAuraAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
@@ -202,55 +201,20 @@ void UAuraAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData
 void UAuraAttributeSet::OnRep_Health(const FGameplayAttributeData& OldValue)
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, Health, OldValue);
-
-	// Call the change callback, but without an instigator
-	// This could be changed to an explicit RPC in the future
-	// These events on the client should not be changing attributes
-
-	const float CurrentHealth = GetHealth();
-	const float EstimatedMagnitude = CurrentHealth - OldValue.GetCurrentValue();
-
-	OnHealthChanged.Broadcast(nullptr, nullptr, nullptr, EstimatedMagnitude, OldValue.GetCurrentValue(), CurrentHealth);
-
-	if (!bOutOfHealth && CurrentHealth <= 0.0f)
-	{
-		OnOutOfHealth.Broadcast(nullptr, nullptr, nullptr, EstimatedMagnitude, OldValue.GetCurrentValue(), CurrentHealth);
-	}
-
-	bOutOfHealth = (CurrentHealth <= 0.0f);
 }
 
 void UAuraAttributeSet::OnRep_MaxHealth(const FGameplayAttributeData& OldValue)
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, MaxHealth, OldValue);
-
-	// Call the change callback, but without an instigator
-	// This could be changed to an explicit RPC in the future
-	OnMaxHealthChanged.Broadcast(nullptr, nullptr, nullptr, GetMaxHealth() - OldValue.GetCurrentValue(), OldValue.GetCurrentValue(), GetMaxHealth());
-
 }
 
 void UAuraAttributeSet::OnRep_Mana(const FGameplayAttributeData& OldValue)
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, Mana, OldValue);
-
-	const float CurrentMana = GetMana();
-	const float EstimatedMagnitude = CurrentMana - OldValue.GetCurrentValue();
-
-	OnHealthChanged.Broadcast(nullptr, nullptr, nullptr, EstimatedMagnitude, OldValue.GetCurrentValue(), CurrentMana);
-
-	if (!bOutOfHealth && CurrentMana <= 0.0f)
-	{
-		OnOutOfHealth.Broadcast(nullptr, nullptr, nullptr, EstimatedMagnitude, OldValue.GetCurrentValue(), CurrentMana);
-	}
-
-	bOutOfMana = (CurrentMana <= 0.0f);
 }
 
 void UAuraAttributeSet::OnRep_MaxMana(const FGameplayAttributeData& OldValue)
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, MaxMana, OldValue);
-	OnMaxManaChanged.Broadcast(nullptr, nullptr, nullptr, GetMaxMana() - OldValue.GetCurrentValue(), OldValue.GetCurrentValue(), GetMaxMana());
-}
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, MaxMana, OldValue);}
 #pragma endregion
 
