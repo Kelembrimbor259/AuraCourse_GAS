@@ -7,7 +7,6 @@
 #include "AbilitySystemComponent.h"
 #include "GameplayEffectExtension.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
-#include "Aura/AuraGameplayTags.h"
 #include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
 
@@ -68,6 +67,8 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 	constexpr float MinimumHealth = 0.0f;
 	constexpr float MinimumMana = 0.0f;
 
+	// Breaking globes animation when health/mana changing
+	/*
 	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
 	{
 		// Clamp and fall into out of health handling below
@@ -77,8 +78,8 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 	{
 		// Clamp and fall into out of mana handling below
 		SetMana(FMath::Clamp(GetMana(), MinimumMana, GetMaxMana()));
-	}
-	else if (Data.EvaluatedData.Attribute == GetMaxHealthAttribute())
+	}*/
+	if (Data.EvaluatedData.Attribute == GetMaxHealthAttribute())
 	{
 		// Clamp current health
 		SetHealth(FMath::Clamp(GetHealth(), MinimumHealth, GetMaxHealth()));
