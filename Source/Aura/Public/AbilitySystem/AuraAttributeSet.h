@@ -96,65 +96,10 @@ public:
 	virtual void PreAttributeBaseChange(const FGameplayAttribute& Attribute, float& NewValue) const override;
 	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
 	virtual void PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue) override;
-
-	/*
-	 * Vital Attributes
-	 */
 	
-	//~ Creating Health and MaxHealth attributes
-#pragma region Creating Health and MaxHealth attributes
-	UPROPERTY(ReplicatedUsing = OnRep_Health, BlueprintReadOnly, Category = "VitalAttributes|Health")
-	FGameplayAttributeData Health;
-	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Health);
-
-	UPROPERTY(ReplicatedUsing = OnRep_MaxHealth, BlueprintReadOnly, Category = "VitalAttributes|Health")
-	FGameplayAttributeData MaxHealth;
-	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, MaxHealth);
-	
-	UFUNCTION()
-	void OnRep_Health(const FGameplayAttributeData& OldValue);
-
-	UFUNCTION()
-	void OnRep_MaxHealth(const FGameplayAttributeData& OldValue);
-#pragma endregion  Creating Health and MaxHealth attributes
-	//~ Creating Health and MaxHealth attributes
-
-	//~ Creating Mana and MaxMana attribute
-#pragma region Creating Mana and MaxMana attribute
-	UPROPERTY(ReplicatedUsing = OnRep_Mana, BlueprintReadOnly, Category = "VitalAttributes|Mana")
-	FGameplayAttributeData Mana;
-	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Mana);
-
-	UPROPERTY(ReplicatedUsing = OnRep_MaxMana, BlueprintReadOnly, Category = "VitalAttributes|Mana")
-	FGameplayAttributeData MaxMana;
-	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, MaxMana);
-	
-	UFUNCTION()
-	void OnRep_Mana(const FGameplayAttributeData& OldValue);
-
-	UFUNCTION()
-	void OnRep_MaxMana(const FGameplayAttributeData& OldValue);
-#pragma endregion  Creating Mana and MaxMana attributes
-	//~ Creating Mana and MaxMana attribute
-
-	//~ Test Stamina creation
-#pragma region Stamina
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Stamina, Category = "Vital Attributes")
-	FGameplayAttributeData Stamina;
-	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Stamina);
-	UFUNCTION()
-	void OnRep_Stamina(const FGameplayAttributeData& OldStamina) const
-	{
-		GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, Stamina, OldStamina);
-	}
-#pragma endregion Stamina
-	//~ Test Stamina creation
-
-	/*
-	 * Primary Attributes
-	 */
-
+	//~ Primary Attributes
 #pragma region Strength attribute
+	// Increases Physical Damage
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Strength, Category = "PrimaryAttributes|Strength")
 	FGameplayAttributeData Strength;
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Strength);
@@ -166,6 +111,7 @@ public:
 #pragma endregion Strength
 
 #pragma region Intelligence attribute
+	// Increases Magical Damage
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Intelligence, Category = "PrimaryAttributes|Intelligence")
 	FGameplayAttributeData Intelligence;
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Intelligence);
@@ -177,6 +123,7 @@ public:
 #pragma endregion Intelligence attribute
 
 #pragma region Resilience attribute
+	//Increases Armor and Armor Penetration
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Resilience, Category = "PrimaryAttributes|Resilience")
 	FGameplayAttributeData Resilience;
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Resilience);
@@ -189,6 +136,7 @@ public:
 #pragma endregion Resilience
 
 #pragma region Vigor attribute
+	// Increases Health
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Vigor, Category = "PrimaryAttributes|Vigor")
 	FGameplayAttributeData Vigor;
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Vigor);
@@ -198,22 +146,179 @@ public:
 		GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, Vigor, OldVigor);
 	}
 #pragma endregion Vigor
+	//~ Primary Attributes
 	
+	//~ Secondary Attributes
+#pragma region Armor
+	// Depends on Resilience
+	// Reduces Damage taken, improves Block Chance
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Armor, Category = "SecondaryAttributes|Armor")
+	FGameplayAttributeData Armor;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Armor);
+	UFUNCTION()
+	void OnRep_Armor(const FGameplayAttributeData& OldArmor) const
+	{
+		GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, Armor, OldArmor);
+	}
+#pragma endregion Armor
+
+#pragma region ArmorPenetration
+	// Depends on Resilience
+	// Ignores percentage of Enemy Armor, increases Critical Hit Chance
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_ArmorPenetration, Category = "SecondaryAttributes|ArmorPenetration")
+	FGameplayAttributeData ArmorPenetration;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, ArmorPenetration);
+	UFUNCTION()
+	void OnRep_ArmorPenetration(const FGameplayAttributeData& OldArmorPenetration) const
+	{
+		GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, ArmorPenetration, OldArmorPenetration);
+	}
+#pragma endregion ArmorPenetration
+
+#pragma region BlockChance
+	// Depends on Armor
+	// Chance to cut incoming damage in half
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_BlockChance, Category = "SecondaryAttributes|BlockChance")
+	FGameplayAttributeData BlockChance;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, BlockChance);
+	UFUNCTION()
+	void OnRep_BlockChance(const FGameplayAttributeData& OldBlockChance) const
+	{
+		GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, BlockChance, OldBlockChance);
+	}
+#pragma endregion BlockChance
+
+#pragma region CriticalHitChance
+	// Depends on ArmorPenetration
+	// Chance to deal additional critical hit damage
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_CriticalHitChance, Category = "SecondaryAttributes|CriticalHitChance")
+	FGameplayAttributeData CriticalHitChance;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, CriticalHitChance);
+	UFUNCTION()
+	void OnRep_CriticalHitChance(const FGameplayAttributeData& OldCriticalHitChance) const
+	{
+		GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, CriticalHitChance, OldCriticalHitChance);
+	}
+#pragma endregion CriticalHitChance
+
+#pragma region CriticalHitDamage
+	// Depends on ArmorPenetration
+	// Bonus damage added when a critical hit scored
+	UPROPERTY
+	(BlueprintReadOnly, ReplicatedUsing = OnRep_CriticalHitDamage, Category = "SecondaryAttributes|CriticalHitDamage")
+	FGameplayAttributeData CriticalHitDamage;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, CriticalHitDamage);
+	UFUNCTION()
+	void OnRep_CriticalHitDamage(const FGameplayAttributeData& OldCriticalHitDamage) const
+	{
+		GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, CriticalHitDamage, OldCriticalHitDamage);
+	}
+#pragma endregion CriticalHitDamage
+
+#pragma region CriticalHitResistance
+	// Depends on Armor
+	// Reduces critical hit chance of attacking enemies
+	UPROPERTY
+	(BlueprintReadOnly, ReplicatedUsing = OnRep_CriticalHitResistance, Category = "SecondaryAttributes|CriticalHitResistance")
+	FGameplayAttributeData CriticalHitResistance;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, CriticalHitResistance);
+	UFUNCTION()
+	void OnRep_CriticalHitResistance(const FGameplayAttributeData& OldCriticalHitResistance) const
+	{
+		GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, CriticalHitResistance, OldCriticalHitResistance);
+	}
+#pragma endregion CriticalHitResistance
+
+#pragma region HealthRegeneration
+	// Depends on Vigor
+	// Amount of health regenerated every second
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_HealthRegeneration, Category = "SecondaryAttributes|HealthRegeneration")
+	FGameplayAttributeData HealthRegeneration;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, HealthRegeneration);
+	UFUNCTION()
+	void OnRep_HealthRegeneration(const FGameplayAttributeData& OldHealthRegeneration) const
+	{
+		GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, HealthRegeneration, OldHealthRegeneration);
+	}
+#pragma endregion HealthRegeneration
+
+#pragma region ManaRegeneration
+	// Depends on Intelligence
+	// Amount of mana regenerated every second
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_ManaRegeneration, Category = "SecondaryAttributes|ManaRegeneration")
+	FGameplayAttributeData ManaRegeneration;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, ManaRegeneration);
+	UFUNCTION()
+	void OnRep_ManaRegeneration(const FGameplayAttributeData& OldManaRegeneration) const
+	{
+		GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, ManaRegeneration, OldManaRegeneration);
+	}
+#pragma endregion ManaRegeneration
+
+#pragma region MaxHealth
+	// Depends on Vigor
+	// Maximum amount of health obtainable
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxHealth, Category = "SecondaryAttributes|MaxHealth")
+	FGameplayAttributeData MaxHealth;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, MaxHealth);
+	UFUNCTION()
+	void OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealth) const
+	{
+		GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, MaxHealth, OldMaxHealth);
+	}
+#pragma endregion MaxHealth
+
+#pragma region MaxMana
+	// Depends on Intelligence
+	// Maximum amount of mana obtainable
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxMana, Category = "SecondaryAttributes|MaxHealth")
+	FGameplayAttributeData MaxMana;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, MaxMana);
+	UFUNCTION()
+	void OnRep_MaxMana(const FGameplayAttributeData& OldMaxMana) const
+	{
+		GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, MaxMana, OldMaxMana);
+	}
+#pragma endregion MaxMana
+
+	//~ Secondary Attributes
+	
+	//~ Vital Attributes
+#pragma region Health
+	// Current Health
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Health, Category = "VitalAttributes|Health")
+	FGameplayAttributeData Health;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Health);
+	UFUNCTION()
+	void OnRep_Health(const FGameplayAttributeData& OldHealth) const
+	{
+		GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, Health, OldHealth);
+	}
+#pragma endregion Health
+
+#pragma region Mana
+	// Current Mana
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Mana, Category = "VitalAttributes|Mana")
+	FGameplayAttributeData Mana;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Mana);
+	UFUNCTION()
+	void OnRep_Mana(const FGameplayAttributeData& OldMana) const
+	{
+		GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, Mana, OldMana);
+	}
+#pragma endregion Mana
+	//~ Vital Attributes
+
 protected:
 	
-	void ClampAttribute(const FGameplayAttribute& Attribute, float& NewValue) const;
+	void ClampPreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) const;
+	void ClampPostAttributeChange(const FGameplayAttribute& Attribute, const float& OldValue, const float& NewValue) const;
+	void ClampPostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data);
 
 private:
 
-	// Used to track when the health and mana reaches 0.
-	bool bOutOfHealth;
-	bool bOutOfMana;
-
-	// Store mana and health before any changes 
-	float MaxHealthBeforeAttributeChange;
-	float HealthBeforeAttributeChange;
-	float MaxManaBeforeAttributeChange;
-	float ManaBeforeAttributeChange;
+	const float MinimumHealth = 0.0f;
+	const float MinimumMana = 0.0f;
 
 	void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const;
 };

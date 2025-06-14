@@ -14,17 +14,6 @@ UAuraAttributeSet::UAuraAttributeSet()
 {
 	InitHealth(20.f);
 	InitMana(30.f);
-	InitMaxHealth(100.f);
-	InitMaxMana(100.f);
-
-	InitStamina(100.f);
-
-	bOutOfHealth = false;
-	bOutOfMana = false;
-	MaxHealthBeforeAttributeChange = 0.0f;
-	HealthBeforeAttributeChange = 0.0f;
-	MaxManaBeforeAttributeChange = 0.0f;
-	ManaBeforeAttributeChange = 0.0f;
 }
 
 UAuraAbilitySystemComponent* UAuraAttributeSet::GetAuraAbilitySystemComponent() const
@@ -37,22 +26,30 @@ void UAuraAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	//~ Marking Mana and Health attributes for replication
-	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, Health, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, MaxHealth, COND_None, REPNOTIFY_Always);
-	
-	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, Mana, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, MaxMana, COND_None, REPNOTIFY_Always);
-	//~ Marking Mana and Health attributes for replication
-	
-	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, Stamina, COND_None, REPNOTIFY_Always);
-
 	//~ Marking primary attributes for replication
 	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, Strength, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, Intelligence, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, Resilience, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, Vigor, COND_None, REPNOTIFY_Always);
 	//~ Marking primary attributes for replication
+
+	//~ Marking secondary attributes for replication
+	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, MaxHealth, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, MaxMana, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, Armor, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, ArmorPenetration, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, BlockChance, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, CriticalHitChance, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, CriticalHitDamage, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, CriticalHitResistance, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, HealthRegeneration, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, ManaRegeneration, COND_None, REPNOTIFY_Always);
+	//~ Marking secondary attributes for replication
+
+	//~ Marking vital attributes for replication
+	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, Health, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, Mana, COND_None, REPNOTIFY_Always);
+	//~ Marking vital attributes for replication
 }
 
 bool UAuraAttributeSet::PreGameplayEffectExecute(FGameplayEffectModCallbackData& Data)
@@ -64,31 +61,7 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 {
 	Super::PostGameplayEffectExecute(Data);
 
-	constexpr float MinimumHealth = 0.0f;
-	constexpr float MinimumMana = 0.0f;
-
-	// Breaking globes animation when health/mana changing
-	/*
-	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
-	{
-		// Clamp and fall into out of health handling below
-		SetHealth(FMath::Clamp(GetHealth(), MinimumHealth, GetMaxHealth()));
-	}
-	else if (Data.EvaluatedData.Attribute == GetManaAttribute())
-	{
-		// Clamp and fall into out of mana handling below
-		SetMana(FMath::Clamp(GetMana(), MinimumMana, GetMaxMana()));
-	}*/
-	if (Data.EvaluatedData.Attribute == GetMaxHealthAttribute())
-	{
-		// Clamp current health
-		SetHealth(FMath::Clamp(GetHealth(), MinimumHealth, GetMaxHealth()));
-	}
-	else if (Data.EvaluatedData.Attribute == GetMaxManaAttribute())
-	{
-		// Clamp current mana
-		SetMaxMana(FMath::Clamp(GetMana(), MinimumMana, GetMaxMana()));
-	}
+	ClampPostGameplayEffectExecute(Data);
 
 	FEffectProperties Props;
 	SetEffectProperties(Data, Props);
@@ -98,67 +71,21 @@ void UAuraAttributeSet::PreAttributeBaseChange(const FGameplayAttribute& Attribu
 {
 	Super::PreAttributeBaseChange(Attribute, NewValue);
 
-	ClampAttribute(Attribute, NewValue);
+	ClampPreAttributeChange(Attribute, NewValue);
 }
 
 void UAuraAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
 {
 	Super::PreAttributeChange(Attribute, NewValue);
 
-	ClampAttribute(Attribute, NewValue);
+	//ClampPreAttributeChange(Attribute, NewValue);
 }
 
 void UAuraAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
 {
 	Super::PostAttributeChange(Attribute, OldValue, NewValue);
-	
-	if (Attribute == GetMaxHealthAttribute())
-	{
-		// Make sure current health is not greater than the new max health.
-		if (GetHealth() > NewValue)
-		{
-			UAuraAbilitySystemComponent* AuraASC = GetAuraAbilitySystemComponent();
-			check(AuraASC);
 
-			AuraASC->ApplyModToAttribute(GetHealthAttribute(), EGameplayModOp::Override, NewValue);
-		}
-	}
-	else if (Attribute == GetMaxManaAttribute())
-	{
-		// Make sure current mana is not greater than the new max mana.
-		if (GetMana() > NewValue)
-		{
-			UAuraAbilitySystemComponent* AuraASC = GetAuraAbilitySystemComponent();
-			check(AuraASC);
-
-			AuraASC->ApplyModToAttribute(GetManaAttribute(), EGameplayModOp::Override, NewValue);
-		}
-	}
-}
-
-void UAuraAttributeSet::ClampAttribute(const FGameplayAttribute& Attribute, float& NewValue) const
-{
-	constexpr float MinimumHealth = 0.0f;
-	constexpr float MinimumMana = 0.0f;
-	
-	if (Attribute == GetHealthAttribute())
-	{
-		NewValue = FMath::Clamp(NewValue, MinimumHealth, GetMaxHealth());
-	}
-	else if (Attribute == GetManaAttribute())
-	{
-		NewValue = FMath::Clamp(NewValue, MinimumMana, GetMaxMana());
-	}
-	else if (Attribute == GetMaxHealthAttribute())
-	{
-		// Do not allow max health to drop below 1.
-		NewValue = FMath::Max(NewValue, 1.0f);
-	}
-	else if (Attribute == GetMaxManaAttribute())
-	{
-		// Do not allow max mana to drop below 1.
-		NewValue = FMath::Max(NewValue, 1.0f);
-	}
+	ClampPostAttributeChange(Attribute, OldValue, NewValue);
 }
 
 void UAuraAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const
@@ -194,24 +121,66 @@ void UAuraAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData
 	}
 }
 
-#pragma region OnReps
-void UAuraAttributeSet::OnRep_Health(const FGameplayAttributeData& OldValue)
+void UAuraAttributeSet::ClampPreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, Health, OldValue);
+	if (Attribute == GetHealthAttribute())
+	{
+		NewValue = FMath::Clamp(NewValue, MinimumHealth, GetMaxHealth());
+	}
+	else if (Attribute == GetManaAttribute())
+	{
+		NewValue = FMath::Clamp(NewValue, MinimumMana, GetMaxMana());
+	}
+	else if (Attribute == GetMaxHealthAttribute())
+	{
+		// Do not allow max health to drop below 1.
+		NewValue = FMath::Max(NewValue, 1.0f);
+	}
+	else if (Attribute == GetMaxManaAttribute())
+	{
+		// Do not allow max mana to drop below 1.
+		NewValue = FMath::Max(NewValue, 1.0f);
+	}
 }
 
-void UAuraAttributeSet::OnRep_MaxHealth(const FGameplayAttributeData& OldValue)
+void UAuraAttributeSet::ClampPostAttributeChange(const FGameplayAttribute& Attribute, const float& OldValue,
+	const float& NewValue) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, MaxHealth, OldValue);
+	if (Attribute == GetMaxHealthAttribute())
+	{
+		// Make sure current health is not greater than the new max health.
+		if (GetHealth() > NewValue)
+		{
+			UAuraAbilitySystemComponent* AuraASC = GetAuraAbilitySystemComponent();
+			check(AuraASC);
+
+			AuraASC->ApplyModToAttribute(GetHealthAttribute(), EGameplayModOp::Override, NewValue);
+		}
+	}
+	else if (Attribute == GetMaxManaAttribute())
+	{
+		// Make sure current mana is not greater than the new max mana.
+		if (GetMana() > NewValue)
+		{
+			UAuraAbilitySystemComponent* AuraASC = GetAuraAbilitySystemComponent();
+			check(AuraASC);
+
+			AuraASC->ApplyModToAttribute(GetManaAttribute(), EGameplayModOp::Override, NewValue);
+		}
+	}
 }
 
-void UAuraAttributeSet::OnRep_Mana(const FGameplayAttributeData& OldValue)
+void UAuraAttributeSet::ClampPostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, Mana, OldValue);
+	if (Data.EvaluatedData.Attribute == GetMaxHealthAttribute())
+	{
+		// Clamp current health
+		SetHealth(FMath::Clamp(GetHealth(), MinimumHealth, GetMaxHealth()));
+	}
+	else if (Data.EvaluatedData.Attribute == GetMaxManaAttribute())
+	{
+		// Clamp current mana
+		SetMaxMana(FMath::Clamp(GetMana(), MinimumMana, GetMaxMana()));
+	}
 }
-
-void UAuraAttributeSet::OnRep_MaxMana(const FGameplayAttributeData& OldValue)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, MaxMana, OldValue);}
-#pragma endregion
 
