@@ -22,6 +22,11 @@ AAuraEnemy::AAuraEnemy()
 	
 }
 
+int32 AAuraEnemy::GetCharacterLevel()
+{
+	return CharacterLevel;
+}
+
 void AAuraEnemy::BeginPlay()
 {
 	Super::BeginPlay();
