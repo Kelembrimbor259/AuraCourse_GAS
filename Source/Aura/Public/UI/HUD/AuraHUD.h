@@ -24,6 +24,8 @@ class AURA_API AAuraHUD : public AHUD
 
 public:
 
+	AAuraHUD(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+
 	UPROPERTY()
 	TObjectPtr<UAuraCommonActivatableWidget> OverlayWidget;
 
@@ -32,7 +34,15 @@ public:
 	void InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySystemComponent* ASC, UAttributeSet* AS);
 
 protected:
-	
+
+	//~UObject interface
+	virtual void PreInitializeComponents() override;
+	//~End of UObject interface
+
+	//~AActor interface
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	//~End of AActor interface
 
 private:
 

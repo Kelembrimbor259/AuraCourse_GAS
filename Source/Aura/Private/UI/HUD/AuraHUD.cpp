@@ -3,11 +3,37 @@
 
 #include "UI/HUD/AuraHUD.h"
 
-#include "CommonActionWidget.h"
 #include "UI/CommonUI/AuraCommonActivatableWidget.h"
-//#include "UI/Widget/AuraUserWidget.h"
-#include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "UI/WidgetController/OverlayWidgetController.h"
+#include "Components/GameFrameworkComponentManager.h"
+
+AAuraHUD::AAuraHUD(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = false;
+}
+
+void AAuraHUD::PreInitializeComponents()
+{
+	Super::PreInitializeComponents();
+
+	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this);
+}
+
+void AAuraHUD::BeginPlay()
+{
+	UGameFrameworkComponentManager::SendGameFrameworkComponentExtensionEvent(this, UGameFrameworkComponentManager::NAME_GameActorReady);
+
+	Super::BeginPlay();
+}
+
+void AAuraHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	UGameFrameworkComponentManager::RemoveGameFrameworkComponentReceiver(this);
+
+	Super::EndPlay(EndPlayReason);
+}
 
 UOverlayWidgetController* AAuraHUD::GetOverlayWidgetController(const FWidgetControllerParams& WCParams)
 {
@@ -44,4 +70,6 @@ void AAuraHUD::InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySyst
 	Widget->AddToViewport();
 	//Widget->ActivateWidget();
 }
+
+
 
