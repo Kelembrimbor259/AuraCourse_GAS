@@ -9,6 +9,8 @@
 #include "GameUIPolicy.h"
 #include "PrimaryGameLayout.h"
 
+class FSubsystemCollectionBase;
+
 UAuraUIManagerSubsystem::UAuraUIManagerSubsystem()
 	: Super()
 {

@@ -20,6 +20,7 @@ void UAuraHUDLayout::NativeOnInitialized()
 	// the delegate is called which forwards the event to our own HandleMainMenuAction
 	constexpr bool bShouldDisplayInActionBar = false;
 	RegisterUIActionBinding(FBindUIActionArgs(FUIActionTag::ConvertChecked(AuraTag::UI_Action_MainMenu), bShouldDisplayInActionBar, FSimpleDelegate::CreateUObject(this, &ThisClass::HandleMainMenuAction)));
+	RegisterUIActionBinding(FBindUIActionArgs(FUIActionTag::ConvertChecked(AuraTag::UI_Action_GameMenu), bShouldDisplayInActionBar, FSimpleDelegate::CreateUObject(this, &ThisClass::HandleGameMenuAction)));
 }
 
 void UAuraHUDLayout::HandleMainMenuAction()
@@ -27,5 +28,13 @@ void UAuraHUDLayout::HandleMainMenuAction()
 	if (ensure(!MainMenuClass.IsNull()))
 	{
 		UCommonUIExtensions::PushStreamedContentToLayer_ForPlayer(GetOwningLocalPlayer(), AuraTag::UI_Layer_Menu, MainMenuClass);
+	}
+}
+
+void UAuraHUDLayout::HandleGameMenuAction()
+{
+	if (ensure(!GameMenuClass.IsNull()))
+	{
+		UCommonUIExtensions::PushStreamedContentToLayer_ForPlayer(GetOwningLocalPlayer(), AuraTag::UI_Layer_GameMenu, GameMenuClass);
 	}
 }

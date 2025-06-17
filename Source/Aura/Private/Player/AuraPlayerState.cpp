@@ -7,7 +7,8 @@
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "Net/UnrealNetwork.h"
 
-AAuraPlayerState::AAuraPlayerState()
+AAuraPlayerState::AAuraPlayerState(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 	SetNetUpdateFrequency(100.f);
 

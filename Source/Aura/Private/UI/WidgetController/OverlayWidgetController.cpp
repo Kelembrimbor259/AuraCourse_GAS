@@ -14,11 +14,18 @@ void UOverlayWidgetController::BroadcastInitialValues()
 	Super::BroadcastInitialValues();
 
 	const UAuraAttributeSet* AuraAttributeSet = CastChecked<UAuraAttributeSet>(AttributeSet);
+
 	
 	SendAttributeMessage(AuraAttributeSet->GetHealth(), AuraTag::Message_Update_Health);
 	SendAttributeMessage(AuraAttributeSet->GetMaxHealth(), AuraTag::Message_Update_MaxHealth);
 	SendAttributeMessage(AuraAttributeSet->GetMana(), AuraTag::Message_Update_Mana);
 	SendAttributeMessage(AuraAttributeSet->GetMaxMana(), AuraTag::Message_Update_MaxMana);
+
+	OnHealthChanged.Broadcast(AuraAttributeSet->GetHealth());
+	OnMaxHealthChanged.Broadcast(AuraAttributeSet->GetMaxHealth());
+	OnManaChanged.Broadcast(AuraAttributeSet->GetMana());
+	OnMaxManaChanged.Broadcast(AuraAttributeSet->GetMaxMana());
+
 	
 }
 
@@ -33,25 +40,29 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetHealthAttribute()).AddLambda(
 		[this](const FOnAttributeChangeData& Data)
 		{
-			SendAttributeMessage(Data.NewValue, AuraTag::Message_Update_Health);
+			//SendAttributeMessage(Data.NewValue, AuraTag::Message_Update_Health);
+			OnHealthChanged.Broadcast(Data.NewValue);
 		});
 
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetMaxHealthAttribute()).AddLambda(
 		[this](const FOnAttributeChangeData& Data)
 		{
-			SendAttributeMessage(Data.NewValue, AuraTag::Message_Update_MaxHealth);
+			//SendAttributeMessage(Data.NewValue, AuraTag::Message_Update_MaxHealth);
+			OnMaxHealthChanged.Broadcast(Data.NewValue);
 		});
 
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetManaAttribute()).AddLambda(
 		[this](const FOnAttributeChangeData& Data)
 		{
 			SendAttributeMessage(Data.NewValue, AuraTag::Message_Update_Mana);
+			OnManaChanged.Broadcast(Data.NewValue);
 		});
 	
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetMaxManaAttribute()).AddLambda(
 		[this](const FOnAttributeChangeData& Data)
 		{
 			SendAttributeMessage(Data.NewValue, AuraTag::Message_Update_MaxMana);
+			OnMaxManaChanged.Broadcast(Data.NewValue);
 		});
 #pragma endregion
 
@@ -68,6 +79,7 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 				
 				const FUIWidgetRow* Row = GetDataTableRowByTag<FUIWidgetRow>(MessageWidgetDataTable, Tag);
 				SendWidgetRowMessage(Row);
+				MessageWidgetRowDelegate.Broadcast(*Row);
 			}
 		}
 	}

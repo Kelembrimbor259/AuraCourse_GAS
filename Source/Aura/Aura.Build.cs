@@ -17,14 +17,13 @@ public class Aura : ModuleRules
 			"UMG", 
 			"CommonUI", 
 			"CommonInput", 
-			"GameplayMessageRuntime"
+			"GameplayMessageRuntime", "CommonGame"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
 			"GameplayTags", 
 			"GameplayTasks",
-			"CommonGame",
 			"ModularGameplay",
 			"ModularGameplayActors"
 		});

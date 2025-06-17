@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
-#include "GameFramework/PlayerState.h"
+#include "ModularPlayerState.h"
 #include "AuraPlayerState.generated.h"
 
 class UAttributeSet;
@@ -14,12 +14,12 @@ class UAbilitySystemComponent;
  * 
  */
 UCLASS()
-class AURA_API AAuraPlayerState : public APlayerState, public IAbilitySystemInterface
+class AURA_API AAuraPlayerState : public AModularPlayerState, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
 public:
-	AAuraPlayerState();
+	AAuraPlayerState(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	

@@ -4,7 +4,8 @@
 
 #include "AbilitySystemComponent.h"
 
-AAuraCharacterBase::AAuraCharacterBase()
+AAuraCharacterBase::AAuraCharacterBase(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 	PrimaryActorTick.bCanEverTick = false;
 

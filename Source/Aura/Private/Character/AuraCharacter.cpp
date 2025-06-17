@@ -14,7 +14,8 @@
 #include "UI/HUD/AuraHUD.h"
 
 
-AAuraCharacter::AAuraCharacter()
+AAuraCharacter::AAuraCharacter(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 	CameraArm = CreateDefaultSubobject<USpringArmComponent>("SpringArm");
 	CameraArm->SetupAttachment(GetCapsuleComponent());

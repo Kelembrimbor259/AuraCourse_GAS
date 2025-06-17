@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
-#include "GameFramework/Character.h"
+#include "ModularCharacter.h"
 #include "Interaction/CombatInterface.h"
 #include "AuraCharacterBase.generated.h"
 
@@ -12,13 +12,16 @@ class UGameplayEffect;
 class UAbilitySystemComponent;
 class UAttributeSet;
 
-UCLASS()
-class AURA_API AAuraCharacterBase : public ACharacter, public IAbilitySystemInterface, public ICombatInterface
+/**
+ * Modular Character base
+ */
+UCLASS(meta=(Category=Aura))
+class AURA_API AAuraCharacterBase : public AModularCharacter, public IAbilitySystemInterface, public ICombatInterface
 {
 	GENERATED_BODY()
 
 public:
-	AAuraCharacterBase();
+	AAuraCharacterBase(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
 

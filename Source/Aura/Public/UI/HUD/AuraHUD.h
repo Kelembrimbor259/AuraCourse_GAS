@@ -7,6 +7,8 @@
 
 #include "AuraHUD.generated.h"
 
+class UAuraHUDLayout;
+class UCommonActivatableWidget;
 class UAuraCommonActivatableWidget;
 class UAttributeSet;
 class UAbilitySystemComponent;
@@ -43,6 +45,14 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	//~End of AActor interface
+
+	/** The HUD Layout widget to use (must be derived from Aura HUD Layout) */
+	UPROPERTY(EditDefaultsOnly, DisplayName="HUD Layout Class")
+	TSubclassOf<UAuraHUDLayout> HUDLayoutClass;
+
+	/** Used to keep track of the widget that was created to be our HUD */
+	UPROPERTY(Transient, VisibleInstanceOnly)
+	TWeakObjectPtr<UCommonActivatableWidget> HUDLayoutWidget;
 
 private:
 

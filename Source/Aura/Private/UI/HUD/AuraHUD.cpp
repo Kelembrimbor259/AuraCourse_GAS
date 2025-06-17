@@ -3,9 +3,13 @@
 
 #include "UI/HUD/AuraHUD.h"
 
+#include "CommonUIExtensions.h"
+#include "Aura/AuraGameplayTags.h"
 #include "UI/CommonUI/AuraCommonActivatableWidget.h"
 #include "UI/WidgetController/OverlayWidgetController.h"
 #include "Components/GameFrameworkComponentManager.h"
+#include "UI/CommonUI/AuraHUDLayout.h"
+
 
 AAuraHUD::AAuraHUD(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -48,6 +52,8 @@ UOverlayWidgetController* AAuraHUD::GetOverlayWidgetController(const FWidgetCont
 
 void AAuraHUD::InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySystemComponent* ASC, UAttributeSet* AS)
 {
+	/*
+	 
 	checkf(OverlayWidgetClass, TEXT("Overlay Widget Class uninitialized, please fill out BP_AuraHUD"))
 	checkf(OverlayWidgetControllerClass, TEXT("Overlay Widget Controller Class uninitialized, please fill out BP_AuraHUD"))
 	
@@ -69,6 +75,25 @@ void AAuraHUD::InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySyst
 	
 	Widget->AddToViewport();
 	//Widget->ActivateWidget();
+
+	*/
+	
+	checkf(HUDLayoutClass, TEXT("HUD Layout Class uninitialized, please fill out BP_AuraHUD"))
+	checkf(OverlayWidgetControllerClass, TEXT("Overlay Widget Controller Class uninitialized, please fill out BP_AuraHUD"))
+	
+	HUDLayoutWidget = UCommonUIExtensions::PushContentToLayer_ForPlayer(PC->GetLocalPlayer(), AuraTag::UI_Layer_Game, HUDLayoutClass);
+
+	FWidgetControllerParams WidgetControllerParams(PC, PS, ASC, AS);
+	UOverlayWidgetController* WidgetController = GetOverlayWidgetController(WidgetControllerParams);
+	OverlayWidget = Cast<UAuraCommonActivatableWidget>(HUDLayoutWidget);
+	OverlayWidget->SetWidgetController(WidgetController);
+	
+	FFunctionGraphTask::CreateAndDispatchWhenReady([WidgetController]()
+	{
+		WidgetController->BroadcastInitialValues();
+	}, TStatId(), nullptr, ENamedThreads::GameThread);
+	
+	
 }
 
 
